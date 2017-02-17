@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <script
+    src="https://code.jquery.com/jquery-3.1.1.min.js"
+    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+    crossorigin="anonymous"></script>
+    <form method="post" id="formulario" action="remover.php"/>
+    <input type="text" id="codigo" name="codigo"/>
+    <input type="submit" name="btsubmit" value="Enviar">
+  </form>
+
+    <script type="text/javascript">
+    $("#codigo").focus();
+    $("#codigo").keypress(function (e) {
+    tecladas = $("#codigo").val().length;
+    console.log("tecladas"+tecladas);
+    if (tecladas>=2){
+      setTimeout(function(){
+        document.getElementById("formulario").submit();
+      }, 3000);
+      //envia form
+    }
+    });
+
+    </script>
+  </body>
+</html>

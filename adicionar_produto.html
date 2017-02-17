@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <!--
+    <form method="post" action="aumentar.php"/>
+    <input type="text" id="codigo" name="codigo"/>
+    <input type="submit" name="submit" value="Enviar">
+
+  </form> -->
+<body>
+  <script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+  <style media="screen">
+  .resultItem {
+      padding 8px;::;
+  }
+
+  .Scanner {
+      background-color: lightgreen;
+  }
+  .Keyboard {
+      background-color: antiquewhite;
+  }
+  #resultsList div:first-of-type {
+      border: 1px solid black;
+  }
+  </style>
+    <form id="formulario" method="post" action="aumentar.php"/>
+    <input id="codigo" />
+    <button id="reset">Reset</button>
+</form>
+<br/>
+<div>
+     <h2>Event Information</h2>
+Start: <span id="startTime"></span>
+    <br/>First Key: <span id="firstKey"></span>
+    <br/>Last Ley: <span id="lastKey"></span>
+    <br/>End: <span id="endTime"></span>
+    <br/>Elapsed: <span id="totalTime"></span>
+
+</div>
+<div>
+     <h2>Results</h2>
+
+    <div id="resultsList"></div>
+</div>
+  </body>
+  <script type="text/javascript">
+
+var inputStart, inputStop, firstKey, lastKey, timing, userFinishedEntering;
+var minChars = 3;
+
+// handle a key value being entered by either keyboard or scanner <form method="post" action="aumentar.php"/>
+$("#codigo").keypress(function (e) {
+  // restart the timer
+  if (timing) {
+      clearTimeout(timing);
+  }
+
+  // handle the key event
+  if (e.which == 13) {
+      // Enter key was entered
+
+      // don't submit the form
+      e.preventDefault();
+
+      // has the user finished entering manually?
+      if ($("#codigo").val().length >= minChars){
+          userFinishedEntering = true; // incase the user pressed the enter key
+          inputComplete();
+      }
+  }
+  else {
+      // some other key value was entered
+
+      // could be the last character
+      inputStop = performance.now();
+      lastKey = e.which;
+
+      // don't assume it's finished just yet
+      userFinishedEntering = false;
+
+      // is this the first character?
+      if (!inputStart) {
+          firstKey = e.which;
+          inputStart = inputStop;
+
+          // watch for a loss of focus
+          $("body").on("blur", "#codigo", inputBlur);
+      }
+
+      // start the timer again
+      timing = setTimeout(inputTimeoutHandler, 500);
+
+  }
+
+//
+// if (tecladas>=5 && inputStop-inputStart> 80 && inputStop-inputStart>5){
+//   resetValues();
+// }
+//   console.log("start"+inputStart);
+//
+// console.log("tecladas"+tecladas);
+// console.log(inputStop-inputStart);
+   });
+
+$("#codigo").keypress(function (e) {
+tecladas = $("#codigo").val().length;
+console.log("tecladas"+tecladas);
+console.log(inputStart, inputStop, firstKey, lastKey, timing, userFinishedEntering);
+if (tecladas>=2){
+  setTimeout(function(){   document.getElementById("formulario").submit(); }, 3000);
+  //envia form
+}
+});
+
+// Assume that a loss of focus means the value has finished being entered
+function inputBlur(){
+  clearTimeout(timing);
+  if ($("#codigo").val().length >= minChars){
+      userFinishedEntering = true;
+      inputComplete();
+  }
+};
+
+
+// reset the page
+$("#reset").click(function (e) {
+  e.preventDefault();
+  resetValues();
+});
+
+function resetValues() {
+  // clear the variables
+  inputStart = null;
+  inputStop = null;
+  firstKey = null;
+  lastKey = null;
+  // clear the results
+  inputComplete();
+}
+
+// Assume that it is from the scanner if it was entered really fast
+function isScannerInput() {
+  return (((inputStop - inputStart) / $("#codigo").val().length) < 15);
+}
+
+// Determine if the user is just typing slowly
+function isUserFinishedEntering(){
+  return !isScannerInput() && userFinishedEntering;
+}
+
+function inputTimeoutHandler(){
+  // stop listening for a timer event
+  clearTimeout(timing);
+  // if the value is being entered manually and hasn't finished being entered
+  if (!isUserFinishedEntering() || $("#codigo").val().length < 3) {
+      // keep waiting for input
+      return;
+  }
+  else{
+      reportValues();
+  }
+}
+
+// here we decide what to do now that we know a value has been completely entered
+function inputComplete(){
+  // stop listening for the input to lose focus
+  $("body").off("blur", "#codigo", inputBlur);
+  // report the results
+  reportValues();
+}
+
+function reportValues() {
+  // update the metrics
+  $("#startTime").text(inputStart == null ? "" : inputStart);
+  $("#firstKey").text(firstKey == null ? "" : firstKey);
+  $("#endTime").text(inputStop == null ? "" : inputStop);
+  $("#lastKey").text(lastKey == null ? "" : lastKey);
+  $("#totalTime").text(inputStart == null ? "" : (inputStop - inputStart) + " milliseconds");
+  if (!inputStart) {
+      // clear the results
+      $("#resultsList").html("");
+      $("#codigo").focus().select();
+  } else {
+      // prepend another result item
+      var inputMethod = isScannerInput() ? "Scanner" : "Keyboard";
+      $("#resultsList").prepend("<div class='resultItem " + inputMethod + "'>" +
+          "<span>Value: " + $("#codigo").val() + "<br/>" +
+          "<span>ms/char: " + ((inputStop - inputStart) / $("#codigo").val().length) + "</span></br>" +
+          "<span>InputMethod: <strong>" + inputMethod + "</strong></span></br>" +
+          "</span></div></br>");
+      $("#codigo").focus().select();
+      inputStart = null;
+  }
+  var tempottotal=    ((inputStop - inputStart) / $("#codigo").val().length) ;
+  console.log(tempottotal);
+  if(inputMethod=="Scanner"){
+    document.getElementById("formulario").submit();
+  }
+}
+
+$("#codigo").focus();
+  </script>
+</html>
